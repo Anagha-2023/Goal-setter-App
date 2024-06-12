@@ -75,6 +75,37 @@ const getHome =asyncHandler( async (req,res) =>{
   res.status(200).json(req.user)
 })
 
+//edit user
+const editUser=asyncHandler(async(req,res)=>{
+  const {userId,name,email}=req.body
+  const user=await User.findByIdAndUpdate(userId,{name,email},{new:true})
+
+  if(user){
+      res.status(200).json({
+        _id: user.id,
+        name: user.name,
+        email: user.email,
+        profileUrl: user.profileUrl,
+        token: req.token
+      })
+  }else{
+      res.status(404)
+      throw new Error('User not Found')
+  }
+})
+
+//photo url upload
+const profileUpload = asyncHandler(async (req, res) => {
+  const url = req.body.url;
+
+  const user = await User.findByIdAndUpdate(req.user.id, {
+    profileUrl: url
+  }, { new: true });
+
+  
+  res.status(200).json(user);
+});
+
 
 
 //Generate JWT
@@ -89,5 +120,7 @@ const generateToken = (id) => {
 module.exports = {
   registerUser,
   loginUser,
-  getHome
+  getHome,
+  profileUpload,
+  editUser
 }

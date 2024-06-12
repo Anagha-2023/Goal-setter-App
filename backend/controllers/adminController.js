@@ -6,12 +6,12 @@ const User = require ('../model/userModel');
 
 //adminLogin
 
-const loginAdmin = asyncHandler(async (req,res) => {
-  const {email, password } = req.body;
+const loginAdmin = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
 
-  const user = await User.findOne({email})
+  const user = await User.findOne({ email });
 
-  if(user && user.isAdmin && (await bcrypt.compare(password, user.password))) {
+  if (user && user.isAdmin && (await bcrypt.compare(password, user.password))) {
     res.json({
       _id: user.id,
       name: user.name,
@@ -19,12 +19,12 @@ const loginAdmin = asyncHandler(async (req,res) => {
       phone: user.phone,
       profileUrl: user.profileUrl,
       token: generateToken(user._id),
-    })
-  }else {
-    res.status (400)
-    throw new Error ('Not Authorized')
+    });
+  } else {
+    res.status(400);
+    throw new Error('Not Authorized');
   }
-})
+});
 
 
 const adminAccount = asyncHandler(async (req,res) => {
@@ -96,43 +96,47 @@ const generateToken = (id) => {
 
 //add user from AdminSide
 
-const registerUser = asyncHandler(async (req,res) => {
+const registerUser = asyncHandler(async (req, res) => {
   const { name, email, phone, password } = req.body.userData;
-  console.log(name,email,phone,password + 'hello');
 
-  if(!name || !email || !password || !phone) {
+  if (!name || !email || !phone || !password) {
     res.status(400);
-    throw new Error ('Please add all Fields');
+    throw new Error('Please add all Fields');
   }
 
-  const userExists = await User.findOne({email});
+  // Check if user already exists
+  const userExists = await User.findOne({ email });
 
-  if(userExists) {
-    res.status (400);
-    throw new Error ('Email already registered');
+  if (userExists) {
+    res.status(400);
+    throw new Error('Email already registered');
   }
 
+  // Hash the password
   const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password,salt);
+  const hashedPassword = await bcrypt.hash(password, salt);
 
+  // Create user
   const user = await User.create({
     name,
-    phone,
     email,
+    phone,
     password: hashedPassword,
   });
-  const users=await User.find({ isAdmin: false })
+
+  // Fetch all non-admin users
+  const users = await User.find({ isAdmin: false });
 
   if (user) {
-    res.status(200).json({users})
+    res.status(200).json({ users });
   } else {
     res.status(400);
     throw new Error('Invalid user data');
   }
- })
+});
+
 
  module.exports={
-  
   loginAdmin,
   adminAccount,
   getUsers,

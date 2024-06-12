@@ -1,45 +1,52 @@
-import { useEffect } from "react";
-import { useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import GoalForm from "../components/GoalForm";
+import Spinner from "../components/spinner";
+import { getGoals, reset } from "../features/goals/goalSlice";
 import GoalItem from "../components/GoalItem";
-import Spinner from '../components/spinner';
-import { reset, getGoals } from "../features/goals/goalSlice";
+
 
 function Dashboard() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
   const { user } = useSelector((state) => state.auth);
-  const { goals, isLoading, isError, message } = useSelector((state) => state.goals);
-
+  const { goals, isLoading, isError, message } = useSelector(
+    (state) => state.goals
+  );
   useEffect(() => {
     if (isError) {
       console.log(message);
     }
-
     if (!user) {
-      navigate('/login');
-    } else {
-      dispatch(getGoals());
+      navigate("/login");
     }
 
-    return () => {
-      dispatch(reset());
-    };
+    dispatch(getGoals());
+ 
   }, [user, navigate, isError, message, dispatch]);
+
+  const profile=(e)=>{
+  e.preventDefault()
+  navigate('/profile')
+  }
 
   if (isLoading) {
     return <Spinner />;
   }
-
   return (
     <>
+    <div className="dashboard-content">
+
+   
       <section className="heading">
-        <h1>Welcome {user && user.name}</h1>
-        <p>Goals Dashboard</p>
+        <h1>Goals Dashboard</h1>
+        <p>Welcome {user && user.name}</p>
       </section>
+
+<div className="goals-content">
       <GoalForm />
+
       <section className="content">
         {goals.length > 0 ? (
           <div className="goals">
@@ -48,10 +55,13 @@ function Dashboard() {
             ))}
           </div>
         ) : (
-          <h3>You have not set any goals</h3>
+          <p>You have not set any goals</p>
         )}
       </section>
+      </div>
+      </div>
     </>
+    
   );
 }
 

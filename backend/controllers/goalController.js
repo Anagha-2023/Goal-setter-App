@@ -45,26 +45,30 @@ const updateGoals = asyncHandler(async (req, res) => {
 })
 
 const deleteGoals = asyncHandler(async (req, res) => {
-  const goal = await Goal.findById(req.params.id)
+  console.log('Goal ID:', req.params.id);
+  console.log('User:', req.user);
+
+  const goal = await Goal.findById(req.params.id);
   if (!goal) {
-    res.status(400)
-    throw new Error('Goal not Found')
+    res.status(400);
+    throw new Error('Goal not found');
   }
 
   if (!req.user) {
-    res.status(401)
-    throw new Error('User not found')
+    res.status(401);
+    throw new Error('User not found');
   }
-  //Make sure logged in user matches the goal user
+
   if (goal.user.toString() !== req.user.id) {
-    res.status(401)
-    throw new Error('User not authorized')
+    res.status(401);
+    throw new Error('User not authorized');
   }
 
-  await Goal.findByIdAndDelete(req.params.id);
-  res.status(200).json({ id: req.params.id })
+  await goal.deleteOne();
+  console.log('Goal removed:', req.params.id);
+  res.status(200).json({ id: req.params.id });
+});
 
-})
 
 module.exports = {
   getGoals,
